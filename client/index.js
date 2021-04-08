@@ -63,7 +63,7 @@ function get(path) {
             host: SERVER,
             path: path
         }, (r) => r.on("data", (d) => {
-            if (r.headers["content-type"] == RUNE_MIME) {
+            if (r.headers["content-type"] == "text/text") {
                 res(parseRuneStruct(d.toString()));
             }
         }));
