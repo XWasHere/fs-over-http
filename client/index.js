@@ -54,22 +54,20 @@ function parseRuneStruct(data) {
 /**
  * @param {String} path 
  * @returns {Directory}
- * @ignore (Unfinished, Needs to return files)
+ * @ignore
  */
-function get(path) {
+function getDir(path) {
     return new Promise((res, rej) => {
         let req = https.request({
             method: "GET",
             host: SERVER,
             path: path
         }, (r) => r.on("data", (d) => {
-            if (r.headers["content-type"] == "text/text") {
-                res(parseRuneStruct(d.toString()));
-            }
+            res(parseRuneStruct(d.toString()));
         }));
 
         req.end();
     });
 }
 
-get('');
+getDir('/').then(console.log);
