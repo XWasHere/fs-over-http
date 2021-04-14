@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
+	"encoding/json"
 )
 
 var (
@@ -20,8 +22,10 @@ var (
 	authToken    = []byte(ReadFileUnsafe("token", true))
 	fsFolder     = "filesystem/"
 	publicFolder = "filesystem/public/"
+	accessFolder = "filesystem/access/"
 	disallowed   = ReadNonEmptyLines("private_folders")
 	ownerPerm    = os.FileMode(0700)
+	accessIds IdFile
 )
 
 func main() {
@@ -45,6 +49,15 @@ func main() {
 		}
 	}
 
+	if _, err := os.Stat(accessFolder); os.IsNotExist(err) {
+		err := os.Mkdir(accessFolder, ownerPerm)
+
+		if err != nil {
+			log.Fatalf("- Error making accessFolder - %v", err)
+		}
+	} 
+
+	//accessIds = LoadAccessIds(strings.Join([]string{accessFolder, "idfile.json"},""))
 	h := RequestHandler
 	if *compress {
 		h = fasthttp.CompressHandler(h)
@@ -326,4 +339,60 @@ func HandleInternalServerError(ctx *fasthttp.RequestCtx, err error) {
 	ctx.Response.SetStatusCode(fasthttp.StatusInternalServerError)
 	fmt.Fprintf(ctx, "500 %v\n", err)
 	log.Printf("- Returned 500 to %s with error %v", ctx.RemoteIP(), err)
+}
+
+func LoadAccessIds(path string) IdFile {
+	d, err := ReadFile(path)
+	if err != nil {
+
+	}
+
+	var f IdFile
+	json.Unmarshal([]byte(d), &f)
+	return (f)
+}
+
+type User struct {
+	id int
+	memberships []int
+}
+
+type Group struct {
+	id int
+	members []int
+}
+
+type UserAccess struct {
+	id int
+}
+
+type GroupAccess struct {
+	id int
+}
+
+type OwnerAccess struct {
+
+}
+
+type AllAccess struct {
+
+}
+
+type FileOwner struct {
+	oid int
+	otype int // 0 user, 1 group
+}
+
+type FileAccess struct {
+	usersA  []UserAccess
+	groupsA []GroupAccess
+	ownerA    OwnerAccess
+	allA      AllAccess
+
+	owner FileOwner
+}
+
+type IdFile struct {
+	users []User
+	groups []Group
 }

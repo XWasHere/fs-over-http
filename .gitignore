@@ -1,5 +1,8 @@
 token
+authfilr$
 .idea/
 filesystem/
 fs-over-http
 private_folders
+
+.replit
